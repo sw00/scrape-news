@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import re
 
 from .sitemap import SitemapSpider
 from scrapenews.items import ScrapenewsItem
@@ -14,10 +15,12 @@ class IOLSpider(SitemapSpider):
 
     sitemap_urls = ['https://www.iol.co.za/robots.txt']
     sitemap_follow = [
-        '^https://www.iol.co.za/news/((?!eish).)*$',
-        'www.iol.co.za/business-report',
-        'www.iol.co.za/politics',
-        'www.iol.co.za/personal-finance',
+        # '^https://www.iol.co.za/news/((?!eish).)*$',
+        # 'www.iol.co.za/business-report',
+        # 'www.iol.co.za/politics',
+        # 'www.iol.co.za/personal-finance',
+        'www.iol.co.za/mercury/news',
+        'www.iol.co.za/mercury/business',
     ]
 
     publication_name = 'IOL News'
@@ -45,6 +48,14 @@ class IOLSpider(SitemapSpider):
             item['file_name'] = response.url.split('/')[-1]
             item['spider_name'] = self.name
 
-            item['publication_name'] = self.publication_name
+            item['publication_name'] = self._publication_name(response.url)
 
             yield item
+
+    def _publication_name(self, url):
+        match = re.match("\.za/(\w+)/news", url)
+
+        if not match:
+            return None
+
+        return match.group(0)
